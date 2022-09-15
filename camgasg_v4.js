@@ -17,6 +17,7 @@ const WARN = "⚠️";
 
 var camURLstveit = "https://www.foto-webcam.eu/webcam/stveit/"
 var camURLhopfgarten = "https://www.foto-webcam.eu/webcam/hopfgarten/"
+var camURLstjakob = "https://www.foto-webcam.eu/webcam/stjakob/"
 
 let fullSizeImage = await new Request(camURLstveit + "/current/400.jpg").loadImage() // var for fullsize webcam
 
