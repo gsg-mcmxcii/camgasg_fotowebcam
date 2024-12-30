@@ -26,43 +26,74 @@ let imagePaths = [
   pathBase + "stjakob.jpg"
 ];
 
-// Zufälliges Bild auswählen
-var randomIndex = Math.floor(Math.random() * camURLs.length);
-var selectedCamURL = camURLs[randomIndex];
-var selectedPath = imagePaths[randomIndex];
+// Dateipfad für die letzte Aktualisierungszeit
+let lastUpdatedFilePath = fm.documentsDirectory() + "/lastUpdated.txt";
 
-// Versuchen, das Bild von iCloud herunterzuladen oder das Bild neu herunterladen
-let image;
-try {
-  // Versuche, das Bild aus iCloud zu lesen
-  await fm.downloadFileFromiCloud(selectedPath);
-  image = fm.readImage(selectedPath); // Bild aus iCloud lesen
-} catch (error) {
-  // Wenn das Bild nicht lokal vorhanden ist, Bild von der Webcam herunterladen
-  let fullSizeImage = await new Request(selectedCamURL + "/current/400.jpg").loadImage();
-  fm.writeImage(selectedPath, fullSizeImage); // Bild in iCloud speichern
-  image = fullSizeImage; // Verwende das heruntergeladene Bild
+// Funktion zum Herunterladen und Speichern des Bildes
+async function downloadAndSaveImage(url, path) {
+  try {
+    let fullSizeImage = await new Request(url + "/current/400.jpg").loadImage();
+    fm.writeImage(path, fullSizeImage); // Bild in iCloud speichern
+    return fullSizeImage; // Bild zurückgeben
+  } catch (error) {
+    console.error("Fehler beim Herunterladen des Bildes:", error);
+    return null;
+  }
 }
 
-// Bild verarbeiten
-let croppedImage = await processImage(image);
+// Funktion, um das Bild zu aktualisieren
+async function updateImage() {
+  var randomIndex = Math.floor(Math.random() * camURLs.length);
+  var selectedCamURL = camURLs[randomIndex];
+  var selectedPath = imagePaths[randomIndex];
 
-// Erstelle das Widget
-var widget = new ListWidget();
-widget.backgroundImage = croppedImage;
-widget.spacing = 0;  // Kein Abstand zwischen den Elementen
+  let image;
+  try {
+    // Bild herunterladen und speichern, unabhängig davon, ob die Datei existiert oder nicht
+    console.log("Lade Bild herunter...");
+    image = await downloadAndSaveImage(selectedCamURL, selectedPath);
+  } catch (error) {
+    // Wenn das Bild nicht heruntergeladen werden konnte, Fehlermeldung
+    console.error("Fehler beim Verarbeiten des Bildes:", error);
+    return null;
+  }
 
-// Erstelle einen Stack, um Text unter dem Bild anzuzeigen
-let stack = widget.addStack();
-stack.layoutVertically(); // Layout vertikal, Bild oben und Text unten
+  if (image) {
+    let croppedImage = await processImage(image);
+    return croppedImage;
+  }
+  return null;
+}
 
-// Widget anzeigen
-if (config.runsInApp) {
-    // display-preview-widget
-    widget.presentMedium(); // andere Optionen sind '.presentSmall()' oder '.presentLarge()'
-} else {
-    // finalize-widget
+// Funktion, die überprüft, ob 15 Minuten vergangen sind und das Bild neu herunterlädt
+async function checkAndUpdateImage() {
+  let currentTime = new Date().getTime();
+  let lastUpdatedTime = 0;
+
+  // Wir überschreiben die letzte Aktualisierungszeit immer
+  fm.writeString(lastUpdatedFilePath, currentTime.toString());
+
+  // Bild jedes Mal herunterladen, ohne zu überprüfen, ob es bereits existiert
+  let newImage = await updateImage();
+  return newImage;
+}
+
+// Initiales Bild oder aktualisiertes Bild laden
+let updatedImage = await checkAndUpdateImage();
+
+if (updatedImage) {
+  var widget = new ListWidget();
+  widget.backgroundImage = updatedImage;
+  widget.spacing = 0;
+
+  let stack = widget.addStack();
+  stack.layoutVertically();
+
+  if (config.runsInApp) {
+    widget.presentMedium();
+  } else {
     Script.setWidget(widget);
+  }
 }
 
 Script.complete();
@@ -134,4 +165,4 @@ async function processImage(image) {
     return Image.fromData(outputData);
 }
 
-//v0603
+//v0611
