@@ -4,8 +4,8 @@
 
 // edit by GSG
 // usecase: Widget Scriptable for Foto-Webcam.eu
-// Version 0.6: (three webcam)
-// description: all 3 webcams, offline mode and image switch
+// Version 0.6: (Image Update every 1 minute)
+// description: All 3 webcams, offline mode, and image switch every 1 minute.
 
 // SCRIPT
 
@@ -26,8 +26,8 @@ let imagePaths = [
   pathBase + "stjakob.jpg"
 ];
 
-// Dateipfad für die letzte Aktualisierungszeit
-let lastUpdatedFilePath = fm.documentsDirectory() + "/lastUpdated.txt";
+// Dateipfad für den nächsten Ausführungszeitpunkt
+let nextRunFilePath = fm.documentsDirectory() + "/nextRun.txt";
 
 // Funktion zum Herunterladen und Speichern des Bildes
 async function downloadAndSaveImage(url, path) {
@@ -49,7 +49,7 @@ async function updateImage() {
 
   let image;
   try {
-    // Bild herunterladen und speichern, unabhängig davon, ob die Datei existiert oder nicht
+    // Bild herunterladen und speichern
     console.log("Lade Bild herunter...");
     image = await downloadAndSaveImage(selectedCamURL, selectedPath);
   } catch (error) {
@@ -65,21 +65,27 @@ async function updateImage() {
   return null;
 }
 
-// Funktion, die überprüft, ob 15 Minuten vergangen sind und das Bild neu herunterlädt
-async function checkAndUpdateImage() {
+// Funktion, die den nächsten Ausführungszeitpunkt berechnet
+async function getNextRunTime() {
   let currentTime = new Date().getTime();
-  let lastUpdatedTime = 0;
+  let nextRunTime = currentTime + 1 * 60 * 1000; // 1 Minute später
 
-  // Wir überschreiben die letzte Aktualisierungszeit immer
-  fm.writeString(lastUpdatedFilePath, currentTime.toString());
+  fm.writeString(nextRunFilePath, nextRunTime.toString()); // Speichern der nächsten Ausführungszeit
 
-  // Bild jedes Mal herunterladen, ohne zu überprüfen, ob es bereits existiert
-  let newImage = await updateImage();
-  return newImage;
+  return nextRunTime;
 }
 
 // Initiales Bild oder aktualisiertes Bild laden
-let updatedImage = await checkAndUpdateImage();
+let updatedImage = await updateImage();
+
+// Überprüfen, ob die nächste Ausführung geplant ist
+let nextRunTime = parseInt(fm.readString(nextRunFilePath) || "0");
+let currentTime = new Date().getTime();
+
+// Wenn die nächste Ausführung erreicht ist, Widget aktualisieren
+if (currentTime >= nextRunTime) {
+  await getNextRunTime(); // Nächste Ausführung auf 1 Minute setzen
+}
 
 if (updatedImage) {
   var widget = new ListWidget();
@@ -89,6 +95,7 @@ if (updatedImage) {
   let stack = widget.addStack();
   stack.layoutVertically();
 
+  // Das Widget jedes Mal neu laden, wenn es in der App läuft
   if (config.runsInApp) {
     widget.presentMedium();
   } else {
@@ -165,4 +172,4 @@ async function processImage(image) {
     return Image.fromData(outputData);
 }
 
-//v0611
+// v0613
