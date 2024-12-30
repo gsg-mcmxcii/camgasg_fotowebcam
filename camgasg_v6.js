@@ -2,7 +2,7 @@
 // These must be at the very top of the file. Do not edit.
 // icon-color: purple; icon-glyph: camera;
 
-// edit by GSG (https://linktr.ee/gsg_mcmxcii)
+// edit by GSG
 // usecase: Widget Scriptable for Foto-Webcam.eu
 // Version 0.6: (three webcam)
 // description: all 3 webcams, offline mode and image switch
