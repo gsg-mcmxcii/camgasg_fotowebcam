@@ -7,6 +7,8 @@
 // usecase: Widget Scriptable for Foto-Webcam.eu
 // Version 0.7: (update des ganzen codes)
 
+// Scriptable: Einfaches Fotowebcam Widget
+
 const FORCE_IMAGE_UPDATE = true;
 
 const imageUrls = [
@@ -41,7 +43,6 @@ async function createWidget() {
 
   // Abstand, um den Footer nach unten zu drücken
   widget.addSpacer();
-  widget.addSpacer(10);
 
   // Hinweis hinzufügen
   const footer = widget.addText(`Mit ❤️ von Scriptable | Bild ${imageIndex + 1} von ${imageUrls.length}${usedCache ? " (aus Cache)" : ""}`);
@@ -51,7 +52,8 @@ async function createWidget() {
   const hour = new Date().getHours();
   footer.textColor = (hour >= 6 && hour < 18) ? Color.black() : Color.white();
 
-  footer.leftAlignText();
+  footer.centerAlignText();
+  widget.addSpacer(); // Platz für mittige Position
 
   return widget;
 }
