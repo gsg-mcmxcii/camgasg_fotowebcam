@@ -7,8 +7,6 @@
 // usecase: Widget Scriptable for Foto-Webcam.eu
 // Version 0.7: (update des ganzen codes)
 
-// Scriptable: Einfaches Fotowebcam Widget
-
 const FORCE_IMAGE_UPDATE = true;
 
 const imageUrls = [
