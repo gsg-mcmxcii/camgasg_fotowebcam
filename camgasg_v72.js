@@ -5,14 +5,16 @@
 // Scriptable: Einfaches Fotowebcam Widget
 // edit by GSG
 // usecase: Widget Scriptable for Foto-Webcam.eu
-// Version 0.7: (update des ganzen codes)
+// Version 0.72: (zwei weitere kameras)
 
 const FORCE_IMAGE_UPDATE = true;
 
 const imageUrls = [
   "https://www.foto-webcam.eu/webcam/stveit/current/1920.jpg",
   "https://www.foto-webcam.eu/webcam/stjakob/current/1920.jpg",
-  "https://www.foto-webcam.eu/webcam/hopfgarten/current/1920.jpg"
+  "https://www.foto-webcam.eu/webcam/hopfgarten/current/1920.jpg",
+  "https://www.foto-webcam.eu/webcam/adlersruhe/current/1920.jpg",
+  "https://www.foto-webcam.eu/webcam/lienz/current/1920.jpg"
 ];
 const refreshInterval = 1 * 60 * 1000; // 1 Minute in Millisekunden
 const cacheKey = "lastImageUpdate";
@@ -39,7 +41,7 @@ async function createWidget() {
   const widgetSize = new Size(400, 190); // Angepasste Größe für das Widget
   widget.backgroundImage = cropImageToTop(image, widgetSize);
 
-  // Abstand, um den Footer nach unten zu drücken
+  // Abstand, um den Text an den unteren Rand zu bringen
   widget.addSpacer();
 
   // Hinweis hinzufügen
@@ -51,7 +53,6 @@ async function createWidget() {
   footer.textColor = (hour >= 6 && hour < 18) ? Color.black() : Color.white();
 
   footer.centerAlignText();
-  widget.addSpacer(); // Platz für mittige Position
 
   return widget;
 }
